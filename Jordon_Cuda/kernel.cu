@@ -10,14 +10,22 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 {
     int i = threadIdx.x;
     c[i] = a[i] + b[i];
+	c[i] = a[i] - b[i];
 }
 
 int main()
 {
-    const int arraySize = 5;
-    const int a[arraySize] = { 1, 2, 3, 4, 5 };
-    const int b[arraySize] = { 10, 20, 30, 40, 50 };
+    const int arraySize = 960;
+    int a[arraySize] = { 0 };
+    int b[arraySize] = { 0 };
     int c[arraySize] = { 0 };
+
+
+	// Set each respective cell value to the value of the index
+	for (int t = 0; t < arraySize; t++) {
+		a[t] = t;
+		b[t] = t;
+	}
 
     // Add vectors in parallel.
     cudaError_t cudaStatus = addWithCuda(c, a, b, arraySize);
@@ -26,8 +34,9 @@ int main()
         return 1;
     }
 
-    printf("{1,2,3,4,5} + {10,20,30,40,50} = {%d,%d,%d,%d,%d}\n",
-        c[0], c[1], c[2], c[3], c[4]);
+	// Print out some results we get from the kernel
+	printf("Value at a[0]: \nValue at b[0]: ", a[0], b[0]);
+
 
     // cudaDeviceReset must be called before exiting in order for profiling and
     // tracing tools such as Nsight and Visual Profiler to show complete traces.
@@ -88,7 +97,15 @@ cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size)
     }
 
     // Launch a kernel on the GPU with one thread for each element.
-    addKernel<<<1, size>>>(dev_c, dev_a, dev_b);
+	addKernel << <100, size >> >(dev_c, dev_a, dev_b);
+	addKernel << <100, size >> >(dev_c, dev_a, dev_b);
+	addKernel << <100, size >> >(dev_c, dev_a, dev_b);
+	addKernel << <100, size >> >(dev_c, dev_a, dev_b);
+	addKernel << <100, size >> >(dev_c, dev_a, dev_b);
+	addKernel << <100, size >> >(dev_c, dev_a, dev_b);
+	addKernel << <100, size >> >(dev_c, dev_a, dev_b);
+	addKernel << <100, size >> >(dev_c, dev_a, dev_b);
+	addKernel << <100, size >> >(dev_c, dev_a, dev_b);
 
     // Check for any errors launching the kernel
     cudaStatus = cudaGetLastError();
